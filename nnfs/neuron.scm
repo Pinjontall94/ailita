@@ -1,14 +1,60 @@
 (define-module (nnfs neuron)
   #:use-module (nnfs macros)
-  #:use-module (nnfs aliases)
   #:use-module (srfi srfi-1)
-  #:export (neuron sigmoid relu softplus))
+  #:export (neuron sigmoid relu softplus layer make-normalized-random-array))
 
-(define first car)
 (define rest cdr)
-(define second cadr)
 (define first-of-first caar)
 (define first-of-second caadr)
+
+(define (repeat num times)
+  (let loop [(num num)
+             (acc '())
+             (count 0)]
+    (if (= count times)
+        acc
+        (loop num
+              (cons num acc)
+              (+ 1 count)))))
+
+
+(define (repeat-vector num times)
+  (->> (repeat num times)
+       (list->vector)))
+
+
+(define (repeat-array num cols rows)
+  (-> num
+      (repeat cols)
+      (repeat rows)))
+
+
+(define (repeat-vector-array num cols rows)
+  (-> num
+      (repeat-vector cols)
+      (repeat-vector rows)))
+
+
+(define (make-normalized-random-array cols rows)
+  (let [(zero-array (repeat-array 0.0 cols rows))
+        (scale-factor 100)]
+    (map (lambda (row)
+           (map (lambda (element) 
+                  (/ (+ element (random scale-factor) 
+                     scale-factor)) 
+                row))
+         zero-array))))
+
+
+(define (make-normalized-random-vector-array cols rows)
+  (let [(zero-array (repeat-vector-array 0.0 cols rows))
+        (scale-factor 100)]
+    (vector-map (lambda (row)
+           (vector-map (lambda (element) 
+                  (/ (+ element (random scale-factor) 
+                     scale-factor)) 
+                row))
+         zero-array))))
 
 
 (define (dot-product v1 v2)
@@ -40,15 +86,26 @@
       (dot-product-iter 0 (list v1 v2))))
 
 
-(define (neuron activation-func weight-vec act-vec bias)
-  (activation-func (+ bias
-                      (dot-product weight-vec act-vec))))
+(define (make-neuron activation-func)
+  (lambda (act-vec weight-vec bias)
+    (activation-func (+ bias
+                      (dot-product weight-vec act-vec)))))
+
 
 (define (sigmoid x)
   (/ 1 (+ 1 (expt 2.71828 (* -1 x)))))
 
+
 (define (relu x)
   (if (< 0 x) x 0))
 
+
 (define (softplus x)
   (log (+ 1 (expt 2.71828 x))))
+
+
+(define (layer activation-func weight-matrix bias-vec)
+  (lambda (act-vec)
+    (map (lambda (wb-matrix)
+           (neuron activation-func (first wb-matrix) (second wb-matrix)))
+         (zip weight-matrix bias-vec))))
