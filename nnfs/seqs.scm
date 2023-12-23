@@ -1,6 +1,8 @@
 (define-module (nnfs seqs)
   #:use-module (nnfs macros)
-  #:export (make-normalized-random-array))
+  #:use-module (srfi srfi-1)
+  #:export (make-normalized-random-array
+            make-random-weights-biases))
 
 (define (repeat num times)
   (let loop [(num num)
@@ -30,12 +32,29 @@
       (repeat-vector rows)))
 
 
-(define (make-normalized-random-array cols rows)
-  (let [(zero-array (repeat-array 0.0 cols rows))
-        (scale-factor 100)]
-    (map (lambda (row)
-           (map (lambda (element)
-                  (/ (+ element (random scale-factor)
-                     scale-factor)))
-                row))
-         zero-array)))
+(define (make-normalized-random-vector dims)
+  (let [(zero-vector (repeat 0.0 dims))]
+    (->> zero-vector
+         (map (lambda (el)
+                (/ (+ el (random 100))
+                   100))))))
+
+
+(define (make-normalized-random-matrix cols rows)
+  (let [(zero-array (repeat-array 0.0 cols rows))]
+    (->> zero-array
+         (map (lambda (row)
+                (map (lambda (el)
+                       (/ (+ el (random 100))
+                          100))
+                     row))))))
+
+
+(define (make-random-vector-list architecture-clist)
+  (fold-right (lambda (el acc)
+                (if (null? el)
+                    acc
+                    (cons (make-normalized-random-array el)
+                          acc)))
+              '()
+              architecture-clist))
