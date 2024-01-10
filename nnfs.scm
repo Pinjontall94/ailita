@@ -3,6 +3,6 @@
   #:use-module (nnfs neuron)
   #:use-module (nnfs seqs))
 
-(display "hello world!\n")
+(display "NNFS loaded!\n")
 
 (format #t "~a\n" %load-path)

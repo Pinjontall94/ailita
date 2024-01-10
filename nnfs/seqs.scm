@@ -1,6 +1,7 @@
 (define-module (nnfs seqs)
   #:use-module (nnfs macros)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-43)
   #:export (make-normalized-random-array
             make-random-weights-biases))
 
@@ -19,23 +20,22 @@
   (->> (repeat num times)
        (list->vector)))
 
+(define (repeat-vector-native num times)
+  (vector-unfold (lambda (i x) (values x x))
+		 times
+		 num))
 
 (define (repeat-array num cols rows)
   (-> num
-      (repeat cols)
-      (repeat rows)))
-
-
-(define (repeat-vector-array num cols rows)
-  (-> num
-      (repeat-vector cols)
-      (repeat-vector rows)))
+      (repeat-vector-native cols)
+      (repeat-vector-native rows)))
 
 
 (define (make-normalized-random-vector dims)
-  (let [(zero-vector (repeat 0.0 dims))]
+  (let [(zero-vector (repeat-vector-native 0.0 dims))]
     (->> zero-vector
-         (map (lambda (el)
+	 ;; Note that lambdas passed to vector-map need an extra index arg
+         (vector-map (lambda (i el)
                 (/ (+ el (random 100))
                    100))))))
 
@@ -43,8 +43,8 @@
 (define (make-normalized-random-matrix cols rows)
   (let [(zero-array (repeat-array 0.0 cols rows))]
     (->> zero-array
-         (map (lambda (row)
-                (map (lambda (el)
+         (vector-map (lambda (i row)
+                (vector-map (lambda (i el)
                        (/ (+ el (random 100))
                           100))
                      row))))))
