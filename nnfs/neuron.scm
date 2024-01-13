@@ -1,14 +1,17 @@
 (define-module (nnfs neuron)
   #:use-module (nnfs macros)
+  #:use-module (nnfs aliases)
   #:use-module (nnfs seqs)
   #:use-module (srfi srfi-1)
-  #:export (neural-network sigmoid-neuron derived-sigmoid relu sigmoid softplus))
-
-;; Niceties
-(define rest cdr)
-(define first-of-first caar)
-(define first-of-second caadr)
-
+  #:use-module (srfi srfi-43)
+  #:export (neural-network
+	    make-neuron
+	    sigmoid-neuron
+	    sigmoid
+	    derived-sigmoid
+	    relu
+	    derived-relu
+	    softplus))
 
 ;; Activation Functions
 (define (sigmoid x)
@@ -21,13 +24,28 @@
 (define (relu x)
   (if (< 0 x) x 0))
 
+(define (derived-relu x)
+  (if (< 0 x) 1 0))
+
 (define (softplus x)
   (log (+ 1 (expt 2.71828 x))))
 
 
 ;; Neurons
-(define (dot-product v1 v2)
-  (apply + (map * v1 v2)))
+(define (sum-vector v)
+  (let loop [(i 0)
+	     (acc 0)]
+    (if (= i (vector-length v))
+	acc
+	(loop (+ i 1)
+	      (+ acc (vector-ref v i))))))
+
+(define (dot-product lst1 lst2)
+  (sum (map * lst1 lst2)))
+
+(define (dot-product-vector v1 v2)
+  (sum-vector (vector-map (lambda (i x y) (* x y))
+				 v1 v2)))
 
 (define (make-neuron activation-func)
   (lambda (weights bias activations)
@@ -40,21 +58,18 @@
 
 ;; Layers
 (define (sigmoid-layer weights biases activations)
-  (let [(per-neuron-weights-biases (zip weights biases))]
-    (map (lambda (wb)
-           (sigmoid-neuron (first wb)
-                           (second wb)
+  (map (lambda (weights biases)
+           (sigmoid-neuron weights
+                           biases
                            activations))
-         per-neuron-weights-biases)))
+         weights biases))
 
 
 ;; Feed-forward network
 (define (neural-network weights biases activations)
-  (fold-right (lambda (acc el)
-                (if (null? el) ;; Could add conditionals for different act funcs
+  (fold-right (lambda (w b acc)
+                (if (or (null? w) (null? b)) ;; Could add conditionals for different act funcs
                     acc
-                    (sigmoid-layer (first el)
-                                   (second el)
-                                   acc)))
+                    (sigmoid-layer w b acc)))
               activations
-              (zip weights biases)))
+              weights biases))

@@ -2,7 +2,12 @@
   #:use-module (nnfs macros)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
-  #:export (make-normalized-random-array
+  #:export (repeat
+	    repeat-array
+	    repeat-vector
+	    repeat-vector-native
+	    make-random-vector-list
+	    make-normalized-random-array
             make-random-weights-biases))
 
 (define (repeat num times)
@@ -21,18 +26,19 @@
        (list->vector)))
 
 (define (repeat-vector-native num times)
+  ;; values call determines construction of current and next val at index i
   (vector-unfold (lambda (i x) (values x x))
 		 times
 		 num))
 
 (define (repeat-array num cols rows)
   (-> num
-      (repeat-vector-native cols)
-      (repeat-vector-native rows)))
+      (repeat cols)
+      (repeat rows)))
 
 
 (define (make-normalized-random-vector dims)
-  (let [(zero-vector (repeat-vector-native 0.0 dims))]
+  (let [(zero-vector (repeat 0.0 dims))]
     (->> zero-vector
 	 ;; Note that lambdas passed to vector-map need an extra index arg
          (vector-map (lambda (i el)
@@ -50,11 +56,11 @@
                      row))))))
 
 
-(define (make-random-vector-list architecture-clist)
+(define (make-random-vector-list architecture-list)
   (fold-right (lambda (el acc)
                 (if (null? el)
                     acc
-                    (cons (make-normalized-random-array el)
+                    (cons (make-normalized-random-vector el)
                           acc)))
               '()
-              architecture-clist))
+              architecture-list))
