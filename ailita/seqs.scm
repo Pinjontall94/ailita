@@ -1,5 +1,5 @@
-(define-module (nnfs seqs)
-  #:use-module (nnfs macros)
+(define-module (ailita seqs)
+  #:use-module (ailita macros)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
   #:export (repeat

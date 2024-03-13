@@ -1,7 +1,7 @@
-(define-module (nnfs neuron)
-  #:use-module (nnfs macros)
-  #:use-module (nnfs aliases)
-  #:use-module (nnfs seqs)
+(define-module (ailita neuron)
+  #:use-module (ailita macros)
+  #:use-module (ailita aliases)
+  #:use-module (ailita seqs)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
   #:export (neural-network

@@ -1,4 +1,4 @@
-(define-module (nnfs aliases)
+(define-module (ailita aliases)
   #:export (rest first-of-first first-of-second))
 
 (define rest cdr)

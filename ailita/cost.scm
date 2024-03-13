@@ -1,5 +1,5 @@
-(define-module (nnfs cost)
-  #:use-module (nnfs aliases)
+(define-module (ailita cost)
+  #:use-module (ailita aliases)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
   #:export (quadratic-cost))

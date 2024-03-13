@@ -1,4 +1,4 @@
-# NNFS-SCM
+# Ailita
 
 This repo contains the code for my neural network implementation from first 
 principles. Note that this code is not based on any existing NNFS project,

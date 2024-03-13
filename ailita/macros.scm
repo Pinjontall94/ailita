@@ -1,4 +1,4 @@
-(define-module (nnfs macros)
+(define-module (ailita macros)
     #:export (-> ->>))
 
 (define-syntax ->>
