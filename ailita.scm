@@ -13,12 +13,12 @@
 (define dbl-training-set (zip dbl-training-input dbl-expected-output))
 
 (define (mse a b)
-  """Compute the mean squared error of two values."""
+  "Compute the mean squared error of two values."
   (let ((delta (- a b)))
     (* delta delta)))
 
 (define (cost model input expected)
-  """Compute the cost of a given model with respect to expected output."""
+  "Compute the cost of a given model with respect to expected output."
   (let* [(w model)
 	 (x input)
 	 (exp expected)
@@ -30,17 +30,23 @@
 			    zipped-outputs))
 	 ;; Sum all pairwise-mse to find the total cost
 	 (result (fold + 0 pairwise-mse))]
-    ;; Print/format the inputs, intermediate values, and result before returning
-    ;; the result from the function
-    (and (format #t "w (model): ~a\n" w)
-	 (format #t "x (input): ~a\n" x)
-	 (format #t "exp (expected output): ~a\n" exp)
-	 (format #t "y (actual output): ~a\n" y)
-	 (format #t "========================================\n")
-	 (map (lambda (p)
-		(format #t "expected: ~a\tactual: ~a\n"
-			(first p) (second p)))
-	      zipped-outputs)
-	 (format #t "pairwise-mse: ~a\n" pairwise-mse)
-	 (format #t "cost of the model:\n"))
+    ;; Return the cost
     result))
+
+;; (define pre-baked-random-weight (random 10))
+(define pre-baked-random-weight 5)
+
+;; if w = 5 => cost = 495
+(define init-cost (cost pre-baked-random-weight dbl-training-input dbl-expected-output))
+
+(define (dbl-cost w)
+  (cost w dbl-training-input dbl-expected-output))
+
+;; pick some tiny value to nudge w by
+(define eps 1e-4)
+
+(define (finite-difference f input-to-improve h)
+  "We have differentiation at home. Differentiation at home:"
+  (/ (- (f (+ input-to-improve h))
+	(f input-to-improve))
+     h))
